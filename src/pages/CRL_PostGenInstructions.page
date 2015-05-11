@@ -1,0 +1,38 @@
+<apex:page standardController="Related_List__c" extensions="CRL_PostGenCtrl">
+	<apex:pageBlock title="Instructions">
+		<apex:pageBlockSection title="Congratulations" columns="1">
+			Congrats, You've just generated all the Apex, and Visualforce needed to display your custom related list on
+			{!Related_List__c.On_Object__c} detail pages.
+		</apex:pageBlockSection>
+		<apex:pageBlockSection title="Next Steps" columns="1">
+			<ul>
+				<li>Ensure the tests pass. This package has created the appropriate test classes for the Apex code it generated. However, you should still run these tests to verify that they pass.</li>
+				<li>
+					Once you're satisfied the tests pass, you'll likely want to create a change set and deploy it to production. Your changeset should include:
+					<ul>
+						<li>
+							Apex Class: {!Related_List__c.Controller_Name__c}
+						</li>
+						<li>
+							Apex Class: {!Related_List__c.Controller_Name__c}_Tests
+						</li>
+						<li>
+							Visualforce Page: {!Related_List__c.Name}
+						</li>
+					</ul>
+				</li>
+                <li>
+                	Ensure that you've installed Custom Related Lists in your production org. In production, you won't be able to directly generate new custom related lists, but you must install the package in production so that the Objects and underlying classes exist there.
+                </li>
+				<li>
+					Once you've deployed (or now, if you want to test in your sandbox) when you visit the page layout for {!Related_List__c.On_Object__c}
+					you'll find a new Visualforce page ({!Related_List__c.Name}) that you can drag and drop into the page layout. I recommend putting it in a custom section, but
+					thats up to you.
+				</li>
+				<li>
+					After adding the visualforce page simply pull up the detail page of any {!Related_List__c.On_Object__c} to see your custom related list!
+				</li>
+			</ul>
+		</apex:pageBlockSection>
+	</apex:pageBlock>
+</apex:page>

@@ -1,0 +1,62 @@
+<apex:page showHeader="false"
+	sidebar="false"
+	standardController="Related_List__c"
+	extensions="CRL_MetaGeneratorCtrl"
+	contentType="text/text"
+>
+public with sharing class {!className} {
+	//this section contains interpolated information from the controller.
+	@testVisible private {!masterObj} masterObject;
+	@testVisible private String detailObjectName = '{!detailObj}';
+	@testVisible private String relatedListUUID = '{!uuid}';
+	@testVisible private String ForeignRelationId = '{!crlid}';
+	@testVisible private Related_List__c rlid;
+	public Boolean initialized {get; set;}
+	public CRL_QueryTools qt {get; set;}
+
+	//METHODS
+	//Constructor
+	public {!className}(ApexPages.StandardController stdController) {
+		this.initialized = false;
+		this.masterObject = ({!masterObj})stdController.getRecord();
+	}
+
+	@testVisible
+	private {!className}(ApexPages.StandardController stdController, id frid) {
+		this.masterObject = ({!masterObj})stdController.getRecord();
+		this.ForeignRelationId = frid;
+		this.qt = new CRL_QueryTools(ForeignRelationId, masterObject.id);
+	}
+
+	//Data Portabilitiy
+	public void verifyRL() {
+		boolean doInsert = false;
+		try{
+			this.rlid = [SELECT id FROM Related_List__c WHERE uuid__c = :relatedListUUID LIMIT 1];
+		} catch (Exception e){
+			rlid = (Related_List__c) JSON.deserialize('{!jsonCRL}', Related_List__c.class);
+			rlid.id = null; // Nullify the id!
+			doInsert = true;
+		}
+		if(doInsert){
+			try{
+				insert rlid;
+			} catch (Exception e){
+				system.debug('Cannot insert portable vesion of Related list object!!!');
+			}
+		}
+
+		if(this.rlid != null {!andand} this.masterObject != null){
+			this.qt = new CRL_QueryTools(rlid.id, masterObject.id);
+			this.initialized = true;
+		}
+	}
+
+	//Data Access
+	public List{!detailObjAsList} getFilteredList() {
+		String query = qt.buildSelectClause() + qt.buildFromClause() + qt.buildWhereClause();
+		List{!detailObjAsList} filtered = Database.query(query);
+		return filtered;
+	}
+}
+</apex:page>

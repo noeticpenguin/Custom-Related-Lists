@@ -1,0 +1,55 @@
+<apex:page showHeader="false"
+	sidebar="false"
+	standardController="Related_List__c"
+	extensions="CRL_MetaGeneratorCtrl"
+	contentType="text/text"
+>
+
+@isTest
+private class {!className}_Test {
+
+	private static Related_list__c generateRelatedListAndInsert() {
+		Related_list__c rl = new Related_list__c();
+		rl.name = 'Awesome New Relation';
+		rl.Displaying_Object__c = '{!detailObj}';
+		rl.On_Object__c = '{!masterObj}';
+		rl.Relation_Field__c = '{!relationField}';
+		rl.Fields_To_Display__c = '{!fieldsToDisplay}';
+		rl.Criteria__c = '{!criteria}';
+		rl.UUID__c = CRL_QueryTools.generateCrytographicUUID();
+		insert rl;
+		return rl;
+	}
+
+	@isTest static void Test_CtrlVars() {
+		Related_list__c rl = generateRelatedListAndInsert();
+		{!masterObj} masterObject = ({!masterObj})TestFactory.createSObject(new {!masterObj}());
+		insert masterObject;
+		{!detailObj} detailObject = ({!detailObj})TestFactory.createSObject(new {!detailObj}({!relationField} = masterObject.id));
+		insert detailObject;
+		ApexPages.StandardController sc = new ApexPages.StandardController(masterObject);
+		Test.startTest();
+		{!className} ctrl = new {!className}(sc, rl.id);
+		Test.stopTest();
+		system.assertEquals(masterObject.getSObjectType(), ctrl.masterObject.getSObjectType());
+		system.assertEquals(String.valueOf(detailObject.getSObjectType()), ctrl.detailObjectName);
+	}
+
+	@isTest static void Test_getFilteredList() {
+		Related_list__c rl = generateRelatedListAndInsert();
+		{!masterObj} masterObject = ({!masterObj})TestFactory.createSObject(new {!masterObj}());
+		insert masterObject;
+		List{!detailObjAsList} detailObjects = (List{!detailObjAsList})TestFactory.createSObjectList(new {!detailObj}({!relationField} = masterObject.id), 5);
+		insert detailObjects;
+		ApexPages.StandardController sc = new ApexPages.StandardController(masterObject);
+		{!className} ctrl = new {!className}(sc, rl.id);
+		Test.startTest();
+		List{!detailObjAsList} results = ctrl.getFilteredList();
+		Test.stopTest();
+
+		System.assertEquals(5, results.size());
+	}
+
+}
+
+</apex:page>

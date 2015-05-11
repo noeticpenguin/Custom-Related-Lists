@@ -1,0 +1,78 @@
+<apex:page showHeader="true" sidebar="true" standardController="Related_List__c" extensions="CRL_NewCRLCtrl">
+	<apex:form >
+		<apex:pageMessages id="pmessages"></apex:pageMessages>
+		<apex:pageBlock title="Setup new Custom Related List">
+			<apex:pageBlockSection title="Step 1: Name your Related List">
+				<apex:outputLabel value="Name this related list?"/>
+				<apex:inputText value="{!wrapper.name}" />
+			</apex:pageBlockSection>
+			<apex:pageBlockSection title="Step 2: Choosing the object on which to display this list">
+				<apex:outputLabel value="Where do you want to display this list?"/>
+				<apex:selectList id="pickAnObject" value="{!wrapper.selectedMasterObj}" size="1" required="true">
+				  <apex:selectOptions value="{!wrapper.selectableObjects}"/>
+				  <apex:actionSupport event="onchange" action="{!noop}" reRender="relObjSection, pmessages"/>
+				</apex:selectList>
+			</apex:pageBlockSection>
+			<apex:outputPanel id="relObjSection">
+				<apex:pageBlockSection title="Step 3: Choosing the object to display">
+					<apex:outputLabel value="Which object's fields will be displayed in this list?"/>
+					<apex:selectList id="pickAnObject2" value="{!wrapper.selectedDetailObj}" size="1">
+						<apex:selectOptions value="{!wrapper.relatedObjects}"/>
+						<apex:actionSupport event="onchange" action="{!noop}" reRender="selectableFields, constraintsRepeat, pmessages"/>
+					</apex:selectList>
+				</apex:pageBlockSection>
+			</apex:outputPanel>
+			<apex:pageBlockSection title="Step 4: Select which fields to display" id="fieldSelect" >
+				<apex:outputPanel id="selectableFields">
+					<c:MultiselectPicklist leftLabel="Available Fields"
+				    leftOptions="{!wrapper.allFields}"
+				    rightLabel="Selected Fields"
+				    rightOptions="{!wrapper.selectedFields}"
+				    size="14"
+				    width="150px"
+				  />
+				</apex:outputPanel>
+			</apex:pageBlockSection>
+			<apex:pageBlockSection title="Final Steps: Add your filter critiera">
+				<apex:outputPanel id="constraintsRepeat">
+					<apex:pageBlockTable value="{!wrapper.criteria}" var="crit">
+						<apex:column headerValue="Order">
+							<apex:outputText value="{!crit.order}"/>
+						</apex:column>
+						<apex:column headerValue="FieldName">
+							<apex:selectList value="{!crit.fieldname}" size="1" disabled="{!ISNULL(wrapper.selectedDetailObj)}" required="true">
+								<apex:selectOptions value="{!wrapper.allFields}" />
+							</apex:selectList>
+						</apex:column>
+						<apex:column headerValue="Operator">
+							<apex:selectList value="{!crit.opperand}" multiselect="false" size="1" disabled="{!ISNULL(wrapper.selectedDetailObj)}" required="true">
+								<apex:selectOptions value="{!crit.opperandOptions}"/>
+							</apex:selectList>
+						</apex:column>
+						<apex:column headerValue="Value">
+							<apex:inputText label="Value for Criteria {!crit.order}" value="{!crit.criteria}" disabled="{!ISNULL(wrapper.selectedDetailObj)}" required="true"/>
+						</apex:column>
+						<apex:column headerValue="AND/OR" title="Should this constraint be evaluated as AND (checked) or OR (unchecked)">
+							<apex:selectList value="{!crit.andOr}" multiselect="false" size="1" disabled="{!ISNULL(wrapper.selectedDetailObj)}" required="true">
+								<apex:selectOptions value="{!crit.andOrOptions}"/>
+							</apex:selectList>
+						</apex:column>
+						<apex:column style="width:85px" headerValue="Actions">
+							<apex:actionSupport event="onclick" action="{!deleteConstraint}" rerender="constraintsRepeat, pmessages" >
+								<apex:param name="rowToBeDeleted" value="{!crit.order}" assignTo="{!wrapper.selectedRowIndex}"/>
+							</apex:actionSupport>
+							<apex:commandButton value="Remove this Criteria"  rerender="constraintsRepeat" onclick="if(confirm('Are you sure you want to delete this criteria?'));" disabled="{!ISNULL(wrapper.selectedDetailObj)}">
+								<apex:param name="rowToBeDeleted" value="{!crit.order}" assignTo="{!wrapper.selectedRowIndex}"></apex:param>
+							</apex:commandButton>
+						</apex:column>
+					</apex:pageBlockTable>
+					<apex:commandbutton value="Add new constraint" action="{!addConstraint}" rerender="constraintsRepeat, pmessages" />
+				</apex:outputPanel>
+			</apex:pageBlockSection>
+			<apex:pageBlockButtons location="bottom" id="pbButtons">
+				<apex:commandButton action="{!save}" value="Create new Custom Related List"/>
+				<apex:commandButton action="{!generateCode}" value="Generate Controller and Page" rendered="{!wrapper.hasBeenSaved}" />
+			</apex:pageBlockButtons>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>

@@ -1,0 +1,10 @@
+<apex:page showHeader="false"
+	sidebar="false"
+	standardController="Related_List__c"
+	extensions="CRL_MetaGeneratorCtrl"
+	contentType="text/text"
+>
+{!startPageTag}
+	{!compString}
+{!endPageTag}
+</apex:page>

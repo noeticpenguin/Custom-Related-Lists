@@ -1,0 +1,64 @@
+<apex:page showHeader="true" sidebar="true">
+	<apex:pageBlock title="Thanks for installing Custom Related Lists" id="pblock">
+		<pageBlockSection title="Atempting Auto creation of Remote Site setting" columns="1" id="automatic">
+		<p>This package works by generating custom Apex classes and Visualforce pages directly in your org, for you.</p>
+		<p>If you'd like you can read the page and class templates Visualforce pages. The package uses visualforce pages: CRL_MetaGenCtrl (Controller), CRL_MetaGenPage (Visualforce Page) and CRL_MetaGenTests (test class).</p>
+		<p>	To do this, it uses the tooling API provided by Salesforce. However, the tooling API requires a remote site setting to authorize the ToolingAPI calls to interact with Salesforce.</p>
+		<p>If you, the installer of this package have permission to create such a remote site setting, a bit of Javascript on this page has taken the liberty of creating one for you.</p>
+		<p>
+			<div id="autocreation" style="padding:5px;">
+
+			</div>
+		</p>
+		</pageBlockSection>
+
+		<div id="manual">
+			<pageBlockSection title="Post install instructions" columns="1" style="display:none;">
+				This package works by generating custom Apex classes and Visualforce pages directly in your org, for you. In order for that happen, you'll need to create a new Remote Site Setting. While we can package remote site settings, there is an ever growing number of Salesforce org urls and it's therefore impractical to package these. To create this remote site setting:
+				<ol>
+					<li>
+						Log in, and navigate to the security controls portion of setup.
+					</li>
+					<li>
+						Click Remote Site Setting.
+					</li>
+					<li>
+						Click New Remote Site.
+					</li>
+					<li>For Remote Site Name put in: <b>CustomRelatedLists</b></li>
+					<li>For Remote Site URL put in: <b>{!LEFT($CurrentPage.URL,FIND('/',$CurrentPage.URL,9))}</b></li>
+					<li>Ensure that the Active checkbox is checked</li>
+				</ol>
+			</pageBlockSection>
+		</div>
+
+	</apex:pageBlock>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/jsforce/1.3.1/jsforce.min.js"></script>
+
+
+	<script type="text/javascript">
+	var conn = new jsforce.Connection({ accessToken: '{!$API.Session_Id}' });
+	var metadata = [{
+			fullName: 'CustomRelatedList',
+			disableProtocolSecurity: false,
+			isActive: true,
+			url: '{!LEFT($CurrentPage.URL,FIND('/',$CurrentPage.URL,9))}'
+	}
+	];
+	jQuery(document).ready(function() {
+		conn.metadata.create('RemoteSiteSetting', metadata, function(err, results) {
+			if (err) {
+				console.log('oops')
+				jQuery('#autocreation').html("<b> Auto creation of Remote Site Setting Failed. Please follow the instructions below</b>");
+				jQuery('#manual').show();
+			}
+			else {
+				console.log('yay!');
+				jQuery('#autocreation').html("<h3> Auto creation of Remote Site Setting succeeded.</h3>");
+				jQuery('#autocreation').css({'background-color':'#61E86D'});
+			}
+		});
+	});
+	</script>
+</apex:page>
