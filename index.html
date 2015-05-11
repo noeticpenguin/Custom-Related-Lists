@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Custom-related-lists by noeticpenguin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Custom-related-lists</h1>
+      <h2 class="project-tagline">No coding required</h2>
+      <a href="https://github.com/noeticpenguin/Custom-Related-Lists" class="btn">View on GitHub</a>
+      <a href="https://github.com/noeticpenguin/Custom-Related-Lists/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/noeticpenguin/Custom-Related-Lists/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="custom-related-lists" class="anchor" href="#custom-related-lists" aria-hidden="true"><span class="octicon octicon-link"></span></a>Custom-Related-Lists</h1>
+
+<h2>
+<a id="the-problem" class="anchor" href="#the-problem" aria-hidden="true"><span class="octicon octicon-link"></span></a>The Problem</h2>
+
+<p>A few weeks ago my wife, a Salesforce admin, asked me if it was possible to create a related list that filtered out inactive contacts. I explained that it's entirely possible to do something similar, but only with Apex and Visualforce. It got me to thinking, that it should be possible to write code, that well, writes the code needed to build related lists with filters. A few weeks later, I'd like to release Custom Related Lists.</p>
+
+<h2>
+<a id="no-coding-required" class="anchor" href="#no-coding-required" aria-hidden="true"><span class="octicon octicon-link"></span></a>No coding required.</h2>
+
+<p>Custom Related Lists is an unmanaged package that enables Declarative developers and Admins to create related list Visualforce pages. These pages can be embedded on detail page layouts using the page layout editor. They mimic the functionality of native related lists with a few additions. With Custom Related Lists, users can select and create criteria to filter records displayed in the list. Now users can create a related list of Contacts on the Account detail page that filters out inactive contacts, or contacts of a given record type. Additionally, Custom Related Lists is not bound to the 10 field limit. Custom Related Lists is capable of displaying all the fields of a child object in the list, but users should be mindful of the user experience implications that has.</p>
+
+<h2>
+<a id="how-it-works" class="anchor" href="#how-it-works" aria-hidden="true"><span class="octicon octicon-link"></span></a>How it works.</h2>
+
+<p>This is the technical bit, and if you're just interested in using Custom Related Lists, you might want to skip this section. Fundamentally, Custom Related Lists (CRL) (ab)uses Visualforce as a template system to abstract out the boiler plate bits of Apex and Visualforce. It consists of three Visualforce template files:</p>
+
+<ul>
+<li>CRL_MetaGenCtrl - the Controller template</li>
+<li>CRL_MetaGenPage - Visualforce page template</li>
+<li>CRL_MetaGenTests - Apex tests for the controller</li>
+</ul>
+
+<p>Each of these files uses the CRL_MetaGeneratorCtrl controller, which is responsible for providing the non-boilerplate bits of code. The new Related_List__c record page has been overridden to provide a nice Visualforce wizard. The user selects the "master" object -- on whose detail pages this list will display and the "detail" object whose records will be displayed on the list. Once those are selected, the user can select the fields to display, as well as defining criteria filters. The wizard is intentionally dynamic; selecting the "master" object automatically determines which objects are related to the it and populates the detail selection list with related objects. Once the user has specified the details, the page controller first saves the record, and generates the controller, test and Visualforce page needed. These are generated from the templates I mentioned above, using a little-known pageReference method - getContents(). getContents renders the given Visualforce page into a string, as if it was requested by a browser. This allows us to use Visualforce as a templating systems. The templates mentioned above are tied to a custom controller that, when rendered in Apex through getContents() result in apex code with the users selected options merged in. For example, to be included on a detail page, the  Visualforce page that displays the list must extend the standard controller of the selected object. The controller has a method to generate the "startPageTag" which is simply written to the final Visualforce page with standard merge sytax: {!startPageTag}</p>
+
+<h2>
+<a id="putting-it-in-place" class="anchor" href="#putting-it-in-place" aria-hidden="true"><span class="octicon octicon-link"></span></a>Putting it in place</h2>
+
+<p>After the custom controller extension, test and visualforce page are rendered to strings, the application puts the code in place. Apex code is placed with the Tooling API and the Visualforce page in place with a standard Rest call. (I have no idea, why Visualforce can be created with a rest call, but we need the Tooling API for Apex.) I want to give a shout out to Andrew Fawcett and James Logthry for their excelent Tooling Api Apex library. (Please note, that the version of the library shipped with Custom Related Lists is truncated including only enough of it to insert Apex classes.) Because of how Custom Related Lists uses the Tooling API, it's important to note that Generating the code works in Sandboxes and Developer orgs but is not supported in Production orgs, as these require full test runs for deployment. The toolingAPI requires a custom remote site setting to function. This is automatically generated using the Javascript metadata API wrapper JSForce whenever you load the app. If autogeneration of the remote site setting fails for some reason, users are given instructions on creating it.</p>
+
+<h2>
+<a id="dynamicity-and-data-portability" class="anchor" href="#dynamicity-and-data-portability" aria-hidden="true"><span class="octicon octicon-link"></span></a>Dynamicity and Data Portability</h2>
+
+<p>Custom Related Lists is designed to be run for creation in a sandbox, and use in a production environment. However, it's also designed to be highly dynamic. It would be a pain to re-generate the code and changeset every time we wanted to change what fields are displayed. To prevent that need, the generate code references a Custom Related List object record on page load. This allows admins to change the fields displayed and criteria without having to re-generate the code and deploy it. However, this also means that users would have to re-create the record in the production org. To prevent this need, the generated code contains a JSON encoded version of the initial Related_Lists__c record. After deployment to production, on the first display of the related list, the code will de-serialize the JSON and create the needed record. It is highly recommend that you leave sharing settings for Related_List__c records as public read.</p>
+
+<h2>
+<a id="using-custom-related-lists" class="anchor" href="#using-custom-related-lists" aria-hidden="true"><span class="octicon octicon-link"></span></a>Using Custom Related Lists</h2>
+
+<p>Installing Custom Related lists is slighting more complex than a standard package as it must be installed in both your Production org and your Sandbox. Once you've installed in both orgs using these links:</p>
+
+<p><a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1a000000DaLM">Production / Developer edition install link</a></p>
+
+<p><a href="https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1a000000DaLM">Sandbox install link</a></p>
+
+<p>Once installed, the process is straightforward. First, open the Custom Related Lists app from the app selection menu:app selection This will load the apps info page which will attempt to securely create a remote site setting on your behalf. If you're an administrator of the org, this should succeed, and you'll see a green success menu like this:remote site setting success</p>
+
+<p>If it fails follow the instructions to manually create the needed remote site setting. Once your remote site setting is settled, you can navigate to the Custom Related List tab. crl tabThis is a standard list view for your Custom Related Lists objects. To facilitate ease of use, I've overwritten the New button to utilize a custom Visualforce page that looks like this:</p>
+
+<p>Lets go through each of the input fields here and talk about what they do.</p>
+
+<ol>
+<li>The name you provide here in step 1 is used as the name of your Visualforce page that you'll end up placing on a page layout. It's good to be descriptive, but you have 40 characters, so good examples are things like "Active Contacts for this Account." Short but descriptive.</li>
+<li>Step 2 is where the fun starts. Whatever object you choose here determines everything else available to you. You want to choose the object whose detail page layout you want to display this list on. If you want to display, for instance, active contacts on this account, you'd choose account here. Custom Related Lists looks for you to make this first selection to determine the options available to you in Step 3.</li>
+<li>Step three asks you to choose what relationship you want to display. In the background it asks the system to describe all objects that are related to your choice in Step 2, and shows you the Labels for those relationships. If you have a situation where you have multiple relationships, say a Master/Detail relationship and a Lookup relationship to the same object you must pay careful attention to choose the one you're looking for. As an administrator or developer, you need to ensure you're naming your relationships such that you can distinguish them! In our example of active contacts on this account, we'd choose Contact in Step 3</li>
+<li>Once you've selected the relationship to display, the app will load all of the relevant fields that are available for display. You can select fields on the left hand side and move them to the right, which will select them for display in your list. While standard related lists are limited to 10 fields, custom related lists are not.</li>
+<li>Step 5 is probably the most powerful, and crucial step here. Unfortunately it can be the most confusing. Lets start with some terminology. Criteria are the options you're setting to filter which records will be displayed in your list. Constraints are made up of a selected field, an 'operand' which defines the comparison method used, a Value field where you specify the value to be compared, and a final picklist that lets you determine if this criteria should be evaluated with AND or OR. If you've ever created a custom list view, this should be familiar. The wizard starts you off with a single criteria line, but you can add more by clicking on the "add new constraint" button. In our example of Active contacts on Account you might select "Active" for the field name, set the operand picklist to '=' and set the value to 'true' (note, no quotes are needed). This would filter your lists' contents so that it only displays contacts whose Active__c field is equal to true. Other operands available to you include '!=' or not equal, as well as &lt;, &gt;, &lt;= and &gt;= or greater than, less than, less than or equal to and greater or equal to respectively. Some example criteria to get your imagination going:
+
+<ul>
+<li>RecordTypeId, =, your RecordTypeId here -- would result in a related list only displaying related records of a selected record type.</li>
+<li>Email, !=, null -- Null is a special word, and in this case allows you to filter your list to exclude contacts with no email listed.</li>
+<li>CreatedDate, &gt;=, 2005-06-15 -- show only records that were created after June 15th, 2005. Note that you can use any of the APEX Date Literals for the value, and that you are responsible for providing the proper date format string! See here for more details!</li>
+</ul>
+</li>
+<li>I mentioned before that you could create multiple criteria lines by clicking the add-new-constraint button. How those constraints are interpreted in relation to one another is dependant on your selection of And or Or. For instance, if you wanted, you could use AND to ensure that both: RecordTypeID, = , your RecordTypeId as well as lastModifiedDate, &gt;=, LAST_90_DAYS criteria are met -- ensuring that your list would only display records with the matching record type id that were also modified in the last 90 days. If you select OR for those constraints, records with the selected record type ID OR who were modified in the past 90 days would be displayed.</li>
+<li>It is important to note here, that you MUST have at least one constraint for Custom Related Lists to properly work. If you do not have criteria to add, use a standard related list.</li>
+<li>After clicking the 'create new custom related list' button, and the page reloads, you'll see a 'Generate controller and page'. Once you click that button, Custom Related Lists will generate the controller, the test class, and the Visualforce page.</li>
+<li>At this point, you've got everything you need, but only in your sandbox org. There are three files you'll need to include in your changeset, and their filenames are listed on the final page. Deploy your changeset, and then edit your page layout to include your visualforce page and you're set!</li>
+</ol>
+
+<h2>
+<a id="important-considerations-and-caveats" class="anchor" href="#important-considerations-and-caveats" aria-hidden="true"><span class="octicon octicon-link"></span></a>Important considerations and caveats.</h2>
+
+<p>This package makes several assumptions, and while they're valid in the vast majority of cases, they're not always going to work. While the package works hard to ensure that the fields listed for inclusion in the related list are queryable, and available for use, not all of them actually are. For instance, say you're creating a related list of notes to a given Account. The system will report that "Name" is available, but upon running it... not so much. Lets call it a platform quirk. The good news is that most of the fields I've found that are affected by such quirks are not the kinds of fields you'd typically want to put in such a list. The really good news, is that the Related lists are fully dynamic. When the page loads it pulls it's configuration details from the Related_List__C object. If you run into an issue with a field not being available you can edit the fields on the object and  reload. No code regeneration needed.</p>
+
+<h2>
+<a id="finally" class="anchor" href="#finally" aria-hidden="true"><span class="octicon octicon-link"></span></a>finally</h2>
+
+<p>I hope y'all find this as useful, as I had a ton of fun building it. In the future I want to fix the edit screen to use the same wizard, and capture as many edge cases as possible. In the mean time, you can find the code on Github, and I'll gladly accept pull requests, and issues for feature requests. If Custom Related Lists makes it into your org, and saves you time and energy, feel free to hit that tip button on the left.</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/noeticpenguin/Custom-Related-Lists">Custom-related-lists</a> is maintained by <a href="https://github.com/noeticpenguin">noeticpenguin</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+            <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-40872097-4");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
+
