@@ -23,9 +23,9 @@ Custom Related Lists is designed to be run for creation in a sandbox, and use in
 ## Using Custom Related Lists
 Installing Custom Related lists is slighting more complex than a standard package as it must be installed in both your Production org and your Sandbox. Once you've installed in both orgs using these links:
 
-[Production / Developer edition install link](https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1a000000DaLM)
+[Production / Developer edition install link](https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1a000000DnEj)
 
-[Sandbox install link](https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1a000000DaLM)
+[Sandbox install link](https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1a000000DnEj)
 
 Once installed, the process is straightforward. First, open the Custom Related Lists app from the app selection menu:app selection This will load the apps info page which will attempt to securely create a remote site setting on your behalf. If you're an administrator of the org, this should succeed, and you'll see a green success menu like this:remote site setting success
 

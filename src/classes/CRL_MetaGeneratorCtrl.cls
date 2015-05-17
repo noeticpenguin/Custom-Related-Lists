@@ -121,13 +121,13 @@ public with sharing class CRL_MetaGeneratorCtrl {
 
 	public string criteria {
 		get {
-			return crl.criteria__c;
+			return String.escapeSingleQuotes(crl.criteria__c);
 		}
 	}
 
 	public string jsonCRL {
 		get {
-			return JSON.serialize(crl);
+			return String.escapeSingleQuotes(JSON.serialize(crl));
 		}
 	}
 
