@@ -19,7 +19,7 @@
 	<types>
         <members>*</members>
         <name>CustomObject</name>
-    </types>
+        </types>
 	<types>
 		<members>*</members>
 		<name>StaticResource</name>
