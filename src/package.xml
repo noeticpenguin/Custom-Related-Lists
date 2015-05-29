@@ -17,9 +17,9 @@
 		<name>ApexTrigger</name>
 	</types>
 	<types>
-        <members>*</members>
-        <name>CustomObject</name>
-    </types>
+        	<members>*</members>
+        	<name>CustomObject</name>
+        </types>
 	<types>
 		<members>*</members>
 		<name>StaticResource</name>
