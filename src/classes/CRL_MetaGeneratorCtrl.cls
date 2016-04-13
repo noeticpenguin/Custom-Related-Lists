@@ -104,7 +104,7 @@ public with sharing class CRL_MetaGeneratorCtrl {
 			'					<apex:pageBlock title="' + this.crl.name + '">\n' +
 			'							<apex:pageBlockTable var="row" value="{!FilteredList}">\n' +
 			'									<apex:column headerValue="Link">\n' +
-			'											<apex:outputLink value="/{!row.Id}">{!row.id}</apex:outputLink>\n' +
+			'											<apex:outputLink value="/{!row.Id}" target="_parent">{!row.name}</apex:outputLink>\n' +
 			'									</apex:column>\n' +
 			'									<apex:repeat value="{!qt.columnTitles}" var="col">\n' +
 			'											<apex:column headerValue="{!qt.columnLabels[col]}">\n' +
