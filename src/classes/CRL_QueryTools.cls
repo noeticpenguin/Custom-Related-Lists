@@ -60,7 +60,7 @@ public with sharing class CRL_QueryTools {
 	public string buildSelectClause() {
 		String selectClause = 'SELECT ' + crl.Fields_to_Display__c;
 		if (!selectClause.toLowerCase().contains(' id')) {
-			selectClause += ', ID ';
+			selectClause += ', ID, Name ';
 		}
 		return selectClause;
 	}
